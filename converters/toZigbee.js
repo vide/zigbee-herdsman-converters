@@ -501,7 +501,7 @@ const converters = {
                 throw new Error(`Brightness value of message: '${JSON.stringify(message)}' invalid, must be a number >= 0 and =< 254`);
             }
 
-            if (state !== undefined && ['on', 'off', 'toggle'].includes(state) === false) {
+            if (state !== undefined && ['on', 'off', 'toggle', 'keep'].includes(state) === false) {
                 throw new Error(`State value of message: '${JSON.stringify(message)}' invalid, must be 'ON', 'OFF' or 'TOGGLE'`);
             }
 
@@ -566,12 +566,17 @@ const converters = {
                 globalStore.putValue(entity, 'brightness', brightness);
                 await entity.command(
                     'genLevelCtrl',
-                    'moveToLevelWithOnOff',
+                    state === 'keep' ? 'moveToLevel' : 'moveToLevelWithOnOff',
                     {level: Number(brightness), transtime: transition.time},
                     getOptions(meta.mapped, entity),
                 );
+
+                const newState = {brightness: Number(brightness)};
+                if (state !== 'keep') {
+                    newState.state = brightness === 0 ? 'OFF' : 'ON';
+                }
                 return {
-                    state: {state: brightness === 0 ? 'OFF' : 'ON', brightness: Number(brightness)},
+                    state: newState,
                     readAfterWriteTime: transition.time * 100,
                 };
             }
