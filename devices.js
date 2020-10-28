@@ -11302,6 +11302,23 @@ const devices = [
         },
     },
     {
+        zigbeeModel: ['TS130F'],
+        model: 'ZM-CSW130-F',
+        vendor: 'Zemismart',
+        description: 'Curtain/roller blind switch',
+        supports: 'open, close, stop',
+        fromZigbee: [fz.ignore_basic_report, fz.ZMCSW130F_cover_position_tilt],
+        toZigbee: [tz.cover_state, tz.cover_position_tilt],
+        exposes: [e.cover_position()],
+        meta: {configureKey: 1, multiEndpoint: true},
+        configure: async (device, coordinatorEndpoint) => {
+            const endpoint = device.getEndpoint(1);
+            await bind(endpoint, coordinatorEndpoint, ['closuresWindowCovering']);
+            // Configure reporing of currentPositionLiftPercentage always fails.
+            // https://github.com/Koenkk/zigbee2mqtt/issues/3216
+        },
+    },
+    {
         zigbeeModel: ['TS0003'],
         model: 'ZM-L03E-Z',
         vendor: 'Zemismart',
